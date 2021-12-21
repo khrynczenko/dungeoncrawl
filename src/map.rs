@@ -19,33 +19,6 @@ impl Map {
         }
     }
 
-    pub fn render(&self, ctx: &mut BTerm, camera: &Camera) {
-        ctx.set_active_console(0);
-        for y in camera.top_y..camera.bottom_y {
-            for x in camera.left_x..camera.right_x {
-                if is_in_bounds(Point::new(x, y)) {
-                    match self.tiles.get(decode_map_index(x, y)) {
-                        Some(TileType::Wall) => ctx.set(
-                            x - camera.left_x,
-                            y - camera.top_y,
-                            WHITE,
-                            BLACK,
-                            to_cp437('#'),
-                        ),
-                        Some(TileType::Floor) => ctx.set(
-                            x - camera.left_x,
-                            y - camera.top_y,
-                            WHITE,
-                            BLACK,
-                            to_cp437('.'),
-                        ),
-                        None => (),
-                    }
-                }
-            }
-        }
-    }
-
     pub fn can_enter_tile(&self, tile_xy: Point) -> bool {
         is_in_bounds(tile_xy)
             && self.tiles[decode_map_index(tile_xy.x, tile_xy.y)] == TileType::Floor
