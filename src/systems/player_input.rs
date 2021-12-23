@@ -56,8 +56,6 @@ pub fn player_input(
                     },
                 ));
             }
-
-            *turn_state = TurnState::PlayerTurn;
         }
         if !did_something {
             if let Ok(health) = ecs
@@ -65,11 +63,12 @@ pub fn player_input(
                 .unwrap()
                 .get_component::<Health>()
             {
-                let mut health = health.clone();
+                let mut health = *health;
                 health.current = i32::min(health.current + 1, health.max);
                 dbg!(health);
                 commands.add_component(*player_entity, health);
             }
         }
+        *turn_state = TurnState::PlayerTurn;
     }
 }

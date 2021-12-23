@@ -32,6 +32,58 @@ impl Map {
 
         Some(decode_map_index(point.x, point.y))
     }
+
+    fn is_valid_exit(&self, loc: Point, delta: Point) -> Option<usize> {
+        let destination = loc + delta;
+        if self.in_bounds(destination) {
+            if self.can_enter_tile(destination) {
+                let idx = self.point2d_to_index(destination);
+                Some(idx)
+            } else {
+                None
+            }
+        } else {
+            None
+        }
+    }
+}
+
+impl BaseMap for Map {
+    fn get_available_exits(&self, idx: usize) -> SmallVec<[(usize, f32); 10]> {
+        let loc = self.index_to_point2d(idx);
+        let mut exits = SmallVec::new();
+        if let Some(idx) = self.is_valid_exit(loc, Point::new(-1, 0)) {
+            exits.push((idx, 1.0));
+        }
+
+        if let Some(idx) = self.is_valid_exit(loc, Point::new(1, 0)) {
+            exits.push((idx, 1.0));
+        }
+
+        if let Some(idx) = self.is_valid_exit(loc, Point::new(0, -1)) {
+            exits.push((idx, 1.0));
+        }
+
+        if let Some(idx) = self.is_valid_exit(loc, Point::new(0, 1)) {
+            exits.push((idx, 1.0));
+        }
+
+        exits
+    }
+
+    fn get_pathing_distance(&self, idx1: usize, idx2: usize) -> f32 {
+        DistanceAlg::Pythagoras.distance2d(self.index_to_point2d(idx1), self.index_to_point2d(idx2))
+    }
+}
+
+impl Algorithm2D for Map {
+    fn dimensions(&self) -> Point {
+        Point::new(SCREEN_WIDTH, SCREEN_HEIGHT)
+    }
+
+    fn in_bounds(&self, point: Point) -> bool {
+        is_in_bounds(point)
+    }
 }
 
 #[allow(clippy::cast_sign_loss)]

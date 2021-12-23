@@ -63,6 +63,7 @@ impl State {
             });
 
         spawn_player(&mut ecs, map_builder.starting_player_position);
+        spawn_yala(&mut ecs, map_builder.starting_amulet_position);
         resources.insert(map_builder.map);
         resources.insert(Camera::new(map_builder.starting_player_position));
         resources.insert(TurnState::AwaitingInput);
@@ -72,6 +73,40 @@ impl State {
             input_systems: build_input_scheduler(),
             player_systems: build_player_scheduler(),
             monster_systems: build_monster_scheduler(),
+        }
+    }
+
+    fn reset_game(&mut self) {
+        self.ecs = World::default();
+        self.resources = Resources::default();
+        let mut rng = RandomNumberGenerator::new();
+        let map_builder = MapBuilder::new(&mut rng);
+        spawn_player(&mut self.ecs, map_builder.starting_player_position);
+        map_builder.rooms.iter().for_each(|room| {
+            spawn_monster(&mut self.ecs, &mut rng, room.center());
+        });
+        spawn_yala(&mut self.ecs, map_builder.starting_amulet_position);
+        self.resources.insert(TurnState::AwaitingInput);
+        self.resources.insert(map_builder.map);
+        self.resources
+            .insert(Camera::new(map_builder.starting_player_position));
+    }
+
+    fn game_over(&mut self, ctx: &mut BTerm) {
+        ctx.set_active_console(2);
+        ctx.print_color_centered(2, RED, BLACK, "Your quest has ended");
+
+        if let Some(VirtualKeyCode::Key1) = ctx.key {
+            self.reset_game();
+        }
+    }
+
+    fn victory(&mut self, ctx: &mut BTerm) {
+        ctx.set_active_console(2);
+        ctx.print_color_centered(2, RED, BLACK, "You won");
+
+        if let Some(VirtualKeyCode::Key1) = ctx.key {
+            self.reset_game();
         }
     }
 }
@@ -100,6 +135,8 @@ impl GameState for State {
             TurnState::MonsterTurn => self
                 .monster_systems
                 .execute(&mut self.ecs, &mut self.resources),
+            TurnState::GameOver => self.game_over(ctx),
+            TurnState::Victory => self.victory(ctx),
         }
 
         render_draw_buffer(ctx).expect("Render error");
