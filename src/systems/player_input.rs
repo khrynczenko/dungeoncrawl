@@ -6,6 +6,7 @@ use crate::prelude::*;
 #[read_component(Point)]
 #[read_component(Player)]
 #[read_component(Enemy)]
+#[read_component(FieldOfView)]
 pub fn player_input(
     ecs: &mut SubWorld<'_>,
     #[resource] key: &Option<VirtualKeyCode>,
@@ -57,6 +58,7 @@ pub fn player_input(
                 ));
             }
         }
+
         if !did_something {
             if let Ok(health) = ecs
                 .entry_ref(*player_entity)
@@ -65,7 +67,6 @@ pub fn player_input(
             {
                 let mut health = *health;
                 health.current = i32::min(health.current + 1, health.max);
-                dbg!(health);
                 commands.add_component(*player_entity, health);
             }
         }

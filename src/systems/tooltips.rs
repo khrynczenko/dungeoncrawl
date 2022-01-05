@@ -5,7 +5,12 @@ use crate::prelude::*;
 #[read_component(Health)]
 #[read_component(Point)]
 #[read_component(Name)]
+#[read_component(Player)]
+#[read_component(FieldOfView)]
 pub fn tooltips(ecs: &SubWorld<'_>, #[resource] mouse_pos: &Point, #[resource] camera: &Camera) {
+    let mut player_fov_query = <&FieldOfView>::query().filter(component::<Player>());
+    let player_fov = player_fov_query.iter(ecs).next().unwrap();
+
     let mut query = <(&Health, &Name, &Point)>::query();
     let offset = Point::new(camera.left_x, camera.top_y);
     let map_pos = *mouse_pos + offset;
@@ -14,6 +19,7 @@ pub fn tooltips(ecs: &SubWorld<'_>, #[resource] mouse_pos: &Point, #[resource] c
     query
         .iter(ecs)
         .filter(|(_, _, pos)| **pos == map_pos)
+        .filter(|(_, _, pos)| player_fov.visible_tiles.contains(*pos))
         .for_each(|(hp, name, _)| {
             let screen_pos = *mouse_pos * 4;
             let display = format!("{} : {} hp", &name.0, hp.current);
