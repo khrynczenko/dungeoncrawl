@@ -13,9 +13,7 @@ pub fn movement(
     commands: &mut CommandBuffer,
 ) {
     if map.can_enter_tile(want_move.destination) {
-        let entity_ref =  ecs
-            .entry_ref(want_move.entity)
-            .unwrap();
+        let entity_ref = ecs.entry_ref(want_move.entity).unwrap();
         commands.add_component(want_move.entity, want_move.destination);
 
         if let Ok(fov) = entity_ref.get_component::<FieldOfView>() {
@@ -27,7 +25,6 @@ pub fn movement(
                 camera.on_player_move(want_move.destination);
             }
         }
-
     }
 
     commands.remove(*entity);

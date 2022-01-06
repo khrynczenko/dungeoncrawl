@@ -53,14 +53,9 @@ impl State {
         let mut resources = Resources::default();
         let mut rng = RandomNumberGenerator::new();
         let map_builder = MapBuilder::new(&mut rng);
-        map_builder
-            .rooms
-            .iter()
-            .skip(1)
-            .map(Rect::center)
-            .for_each(|pos| {
-                spawn_monster(&mut ecs, &mut rng, pos);
-            });
+        map_builder.monster_spawns.iter().for_each(|pos| {
+            spawn_monster(&mut ecs, &mut rng, *pos);
+        });
 
         spawn_player(&mut ecs, map_builder.starting_player_position);
         spawn_yala(&mut ecs, map_builder.starting_amulet_position);
@@ -82,8 +77,8 @@ impl State {
         let mut rng = RandomNumberGenerator::new();
         let map_builder = MapBuilder::new(&mut rng);
         spawn_player(&mut self.ecs, map_builder.starting_player_position);
-        map_builder.rooms.iter().for_each(|room| {
-            spawn_monster(&mut self.ecs, &mut rng, room.center());
+        map_builder.monster_spawns.iter().for_each(|pos| {
+            spawn_monster(&mut self.ecs, &mut rng, *pos);
         });
         spawn_yala(&mut self.ecs, map_builder.starting_amulet_position);
         self.resources.insert(TurnState::AwaitingInput);

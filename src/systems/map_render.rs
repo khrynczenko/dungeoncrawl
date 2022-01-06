@@ -1,6 +1,12 @@
 use crate::prelude::*;
 
-pub fn render_tile(draw_batch: &mut DrawBatch, map: &Map, position: &Point, offset: &Point, tint: ColorPair) {
+pub fn render_tile(
+    draw_batch: &mut DrawBatch,
+    map: &Map,
+    position: &Point,
+    offset: &Point,
+    tint: ColorPair,
+) {
     let idx = decode_map_index(position.x, position.y);
     let glyph = match map.tiles.get(idx) {
         Some(&TileType::Wall) => to_cp437('#'),
@@ -25,10 +31,22 @@ pub fn map_render(ecs: &SubWorld<'_>, #[resource] map: &Map, #[resource] camera:
             let pt = Point::new(x, y);
             let offset = Point::new(camera.left_x, camera.top_y);
             if is_in_bounds(Point::new(x, y)) && player_fov.visible_tiles.contains(&pt) {
-                render_tile(&mut draw_batch, map, &pt, &offset, ColorPair::new(WHITE, BLACK));
+                render_tile(
+                    &mut draw_batch,
+                    map,
+                    &pt,
+                    &offset,
+                    ColorPair::new(WHITE, BLACK),
+                );
             } else if is_in_bounds(pt) {
                 if map.revealed_tiles[decode_map_index(pt.x, pt.y)] == true {
-                    render_tile(&mut draw_batch, map, &pt, &offset, ColorPair::new(GRAY, BLACK));
+                    render_tile(
+                        &mut draw_batch,
+                        map,
+                        &pt,
+                        &offset,
+                        ColorPair::new(GRAY, BLACK),
+                    );
                 }
             }
         }
